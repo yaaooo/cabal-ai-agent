@@ -1,6 +1,6 @@
 # Doom AI Codex
 
-A [RAG](https://en.wikipedia.org/wiki/Retrieval-augmented_generation)-powered AI system for the [Doom](https://en.wikipedia.org/wiki/Doom_(franchise)) universe. Configured to adopt [VEGA](https://doomwiki.org/wiki/VEGA)'s persona.
+A RAG-powered AI system for the [Doom](https://en.wikipedia.org/wiki/Doom_(franchise)) universe. Configured to adopt [VEGA's](https://doomwiki.org/wiki/VEGA) persona.
 
 Built with React, AWS Bedrock, and CDK. 
 
