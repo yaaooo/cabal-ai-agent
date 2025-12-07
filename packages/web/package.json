@@ -4,7 +4,6 @@
   "description": "UI package for the Doom AI Codex.",
   "license": "MIT",
   "author": "Yao-Hui Chua <hello@yao.page> (https://yao.page)",
-  "type": "module",
   "private": true,
   "main": "index.js",
   "scripts": {}
