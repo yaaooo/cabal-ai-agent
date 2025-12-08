@@ -36,7 +36,7 @@ export class VegaStack extends cdk.Stack {
     const vegaCore = new PythonFunction(this, 'VegaCore', {
       entry: path.join(__dirname, '../../core'), // Points to packages/core
       runtime: lambda.Runtime.PYTHON_3_11,
-      index: 'index.py',
+      index: 'vega.py',
       handler: 'handler',
       timeout: cdk.Duration.seconds(60),
       environment: {

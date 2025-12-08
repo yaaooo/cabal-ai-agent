@@ -1,9 +1,10 @@
-# Core AWS SDK
-boto3>=1.34.0
+# AWS SDK
+boto3>=1.34.40
 
-# LangChain Ecosystem
-langchain>=0.1.0
-langchain-aws>=0.1.0
+# LangChain Core & AWS Integration
+langchain==0.1.16
+langchain-aws==0.1.2
+langchain-core==0.1.45
 
-# Optional: For faster local dev if you want to test locally later
-python-dotenv
+# The Agent Logic
+langchain-community==0.0.33
