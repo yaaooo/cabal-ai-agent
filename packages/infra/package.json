@@ -1,7 +1,7 @@
 {
   "name": "@cabal-ai-agent/infra",
   "version": "1.0.0",
-  "description": "Infrastructure package for the Doom AI Codex.",
+  "description": "Infrastructure package for the CABAL AI gent.",
   "license": "MIT",
   "author": "Yao-Hui Chua <hello@yao.page> (https://yao.page)",
   "private": true,

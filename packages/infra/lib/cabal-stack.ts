@@ -12,30 +12,31 @@ export class CabalStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // S3 Bucket that will store all the scraped Doom content
-    const doomCodexBucket = new s3.Bucket(this, "DoomCodexBucket", {
+    // S3 Bucket that will store all the scraped Tiberian Sun content
+    const nodArchivesBucket = new s3.Bucket(this, "NodArchivesBucket", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
 
     // Knowledge base (Vector database) that our orchestrator will interact with
-    const doomCodexKB = new bedrock.VectorKnowledgeBase(this, "DoomKB", {
-      embeddingsModel: bedrock.BedrockFoundationModel.TITAN_EMBED_TEXT_V2_1024,
-      instruction:
-        "Use this knowledge base to answer questions about DOOM lore, demons, and weapons.",
-    });
-
-    // Data source - connects KB and S3
-    const doomCodexDataSource = new bedrock.S3DataSource(
+    const nodArchivesKB = new bedrock.VectorKnowledgeBase(
       this,
-      "DoomCodexDataSource",
+      "NodArchivesKB",
       {
-        bucket: doomCodexBucket,
-        knowledgeBase: doomCodexKB,
-        dataSourceName: "DoomWikiData",
-        chunkingStrategy: bedrock.ChunkingStrategy.FIXED_SIZE,
+        embeddingsModel:
+          bedrock.BedrockFoundationModel.TITAN_EMBED_TEXT_V2_1024,
+        instruction:
+          "Use this knowledge base to answer questions about the Tiberian Sun universe.",
       },
     );
+
+    // Data source - connects KB and S3
+    new bedrock.S3DataSource(this, "NodArchivesDataSource", {
+      bucket: nodArchivesBucket,
+      knowledgeBase: nodArchivesKB,
+      dataSourceName: "DoomWikiData",
+      chunkingStrategy: bedrock.ChunkingStrategy.FIXED_SIZE,
+    });
 
     // Lambda orchestrator
     const cabalCore = new PythonFunction(this, "CabalCore", {
@@ -45,7 +46,7 @@ export class CabalStack extends cdk.Stack {
       handler: "handler",
       timeout: cdk.Duration.seconds(60),
       environment: {
-        KNOWLEDGE_BASE_ID: doomCodexKB.knowledgeBaseId,
+        KNOWLEDGE_BASE_ID: nodArchivesKB.knowledgeBaseId,
         MODEL_ID: "anthropic.claude-3-sonnet-20240229-v1:0",
       },
     });

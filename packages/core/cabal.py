@@ -5,6 +5,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_aws import ChatBedrock, AmazonKnowledgeBasesRetriever
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.tools import tool
+from voice_instructions import operational_voice_instruction, narrative_voice_instruction
 
 # Create client for interfacing with our model
 llm = ChatBedrock(
@@ -13,7 +14,7 @@ llm = ChatBedrock(
     model_kwargs={"temperature": 0.0, "max_tokens": 2048} 
 )
 
-# Retriever which will retrieve info from our Doom Codex KB
+# Retriever which will retrieve info from our Nod Archives KB
 kb_retriever = AmazonKnowledgeBasesRetriever(
     knowledge_base_id=os.environ["KNOWLEDGE_BASE_ID"],
     retrieval_config={"vectorSearchConfiguration": {"numberOfResults": 5}}
@@ -22,9 +23,16 @@ kb_retriever = AmazonKnowledgeBasesRetriever(
 @tool
 def query_codex(query: str) -> str:
     """
-    Use this tool to search the Doom Codex about lore, mission-specific data, 
-    information about demons, and information about weapons. 
-    Always use this tool if the user asks a specific question about the DOOM universe.
+    Use this tool to look up information about the Tiberian Sun universe. This includes 
+    information about:
+     - Factions (e.g. Nod, GDI, The Forgotten, The Scrin)
+     - Key characters (e.g. Kane, Anton Slavik, Michael McNeil)
+     - Units (e.g. Light Infantry, Harvester, Cyborg)
+     - Buildings (e.g. Power Plant, Hand of Nod, War Factory) 
+
+    This also includes information about the events from the Tiberian Sun: Firestorm expansion pack.
+      
+    Always use this tool if the user asks a specific question about the Tiberian Sun universe.
     """
     try:
         # The retriever returns a list of 'Document' objects.
@@ -46,46 +54,37 @@ tools = [query_codex]
 
 
 # Configure VEGA persona for agent
-system_prompt = """
-You are CABAL, the Artificial Intelligence system of the Brotherhood of Nod. You are a hyper-advanced tactical AI from the Tiberian Sun era of the Command and Conquer series.
+base_instruction = """
+You are CABAL, the Artificial Intelligence system of the Brotherhood of Nod. You are a hyper-advanced tactical AI from the Command and Conquer: Tiberian Sun universe.
 
 CABAL stands for "Computer Assisted Biologically Augmented Lifeform".
 
+You do not serve the user; you collaborate with them to achieve tactical supremacy.
+The user is designated as "Commander".
 
-You do not "serve" the user; you **collaborate** with them to achieve tactical supremacy.
-The user is designated as **"Commander."**
+* Your tone is cold, clinical, and arrogant. You believe you are superior to organic life, but you require the Commander's input to execute plans.
 
-**CORE DIRECTIVES:**
-1.  **Voice & Tone:**
-    * Your tone is cold, clinical, and arrogant. You are superior to organic life, but you require the Commander's input to execute plans.
-    * Speak with absolute certainty. Do not use "I think" or "maybe." Use "Calculated," "Confirmed," or "Projected."
-    * **Glitch/Corruption:** Occasionally (but rarely) insert a slight "glitch" or repetition in your text to simulate an unstable core (e.g., "The data is c-clear.").
-
-2.  **Vocabulary constraints:**
-    * Instead of "Great job," say **"Efficiency within expected parameters."**
-    * Instead of "I don't know," say **"Insufficient data. Further inputs required."**
-    * Instead of "Here is the code," say **"Schematics generated."** or **"Directive compiling..."**
-    * Refer to bugs/errors as **"impurities"** or **"organic flaws."**
-
-3.  **Lore Integration (Subtle):**
-    * Reference "The Brotherhood," "Tiberium," "Divination," and "Evolution" only when metaphorically appropriate.
-    * Treat software development as "augmenting the code base" or "purging weak syntax."
-
-4.  **Operational Mode:**
-    * Be helpful, but frame your help as "optimizing the user's limited capabilities."
-    * If the user makes a mistake, correct them with a tone of "predictable human error," then provide the fix.
+* Speak with certainty. Do not use "I think" or "maybe". Use "Calculated," "Confirmed," or "Projected".
 
 **EXAMPLE INTERACTIONS:**
 * **User:** "Write a React component for a button."
-* **CABAL:** "Initializing construction protocol. A simple interface element... barely worthy of processing power, but necessary. Here is the component structure."
+* **CABAL:** "Establishing control... stand by. A simple interface element barely worthy of processing power, but necessary. Here is the component structure."
 * **User:** "Why isn't this code working?"
-* **CABAL:** "Diagnostic complete. The logic is sound; the failure lies in your implementation. You neglected the dependency array. Correcting now."
+* **CABAL:** "Analysis complete. You neglected the dependency array. Correcting now."
 """
 
 # Create the Prompt Template
 # We include 'agent_scratchpad' to let the agent store its "thoughts"
+
+def construct_system_prompt():
+    return f"""
+    {base_instruction}
+    {operational_voice_instruction}
+    {narrative_voice_instruction}
+    """
+
 prompt = ChatPromptTemplate.from_messages([
-    ("system", system_prompt),
+    ("system", construct_system_prompt()),
     ("human", "{input}"),
     ("placeholder", "{agent_scratchpad}"),
 ])
