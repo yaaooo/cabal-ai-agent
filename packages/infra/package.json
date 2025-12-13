@@ -1,5 +1,5 @@
 {
-  "name": "@doom-ai-codex/infra",
+  "name": "@cabal-ai-agent/infra",
   "version": "1.0.0",
   "description": "Infrastructure package for the Doom AI Codex.",
   "license": "MIT",
@@ -16,6 +16,7 @@
     "@cdklabs/generative-ai-cdk-constructs": "^0.1.312",
     "aws-cdk-lib": "^2.232.1",
     "constructs": "^10.4.3",
+    "source-map-support": "^0.5.21",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }

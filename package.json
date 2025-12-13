@@ -1,7 +1,7 @@
 {
-  "name": "doom-ai-codex",
+  "name": "cabal-ai-agent",
   "version": "1.0.0",
-  "description": "A RAG-powered AI system for the Doom universe.",
+  "description": "An AI agent built for the universe of Command and Conquer: Tiberian Sun.",
   "license": "MIT",
   "author": "Yao-Hui Chua <hello@yao.page> (https://yao.page)",
   "private": true,
@@ -12,6 +12,10 @@
     "build": "npm run build --workspaces",
     "install:all": "npm install && pip install -r packages/core/requirements.txt",
     "web": "npm start --workspaces=packages/web",
-    "deploy": "npm run deploy --workspace=packages/infra"
+    "deploy": "npm run deploy --workspace=packages/infra",
+    "format": "prettier --write \"**/*.{ts,tsx,json}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.7.4"
   }
 }

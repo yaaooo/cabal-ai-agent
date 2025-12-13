@@ -1,5 +1,5 @@
 {
-  "name": "@doom-ai-codex/web",
+  "name": "@cabal-ai-agent/web",
   "version": "1.0.0",
   "description": "UI package for the Doom AI Codex.",
   "license": "MIT",
