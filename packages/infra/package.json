@@ -1,13 +1,13 @@
 {
   "name": "@cabal-ai-agent/infra",
   "version": "1.0.0",
-  "description": "Infrastructure package for the CABAL AI gent.",
+  "description": "Infrastructure package for the CABAL AI agent.",
   "license": "MIT",
   "author": "Yao-Hui Chua <hello@yao.page> (https://yao.page)",
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "compile": "tsc",
     "cdk": "cdk",
     "deploy": "cdk deploy"
   },

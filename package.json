@@ -11,8 +11,8 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "install:all": "npm install && pip install -r packages/core/requirements.txt",
-    "web": "npm start --workspaces=packages/web",
-    "deploy": "npm run deploy --workspace=packages/infra",
+    "ui-start": "npm start --workspaces=packages/ui",
+    "infra-deploy": "npm run deploy --workspace=packages/infra",
     "format": "prettier --write \"**/*.{ts,tsx,json}\""
   },
   "devDependencies": {

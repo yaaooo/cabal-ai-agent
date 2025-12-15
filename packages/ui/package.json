@@ -1,10 +1,9 @@
 {
-  "name": "@cabal-ai-agent/web",
+  "name": "@cabal-ai-agent/ui",
   "version": "1.0.0",
-  "description": "UI package for the Doom AI Codex.",
+  "description": "Front-end web UI package for the CABAL AI Agent.",
   "license": "MIT",
   "author": "Yao-Hui Chua <hello@yao.page> (https://yao.page)",
   "private": true,
-  "main": "index.js",
   "scripts": {}
 }
