@@ -1,42 +1,18 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import * as s3 from "aws-cdk-lib/aws-s3";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { PythonFunction } from "@aws-cdk/aws-lambda-python-alpha";
-import { bedrock } from "@cdklabs/generative-ai-cdk-constructs";
 import * as path from "path";
 
-export class CabalStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+interface CabalComputeProps extends cdk.StackProps {
+  nodArchivesKnowledgeBaseId: string;
+}
+
+export class CabalComputeStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props: CabalComputeProps) {
     super(scope, id, props);
-
-    // S3 Bucket that will store all the scraped Tiberian Sun content
-    const nodArchivesBucket = new s3.Bucket(this, "NodArchivesBucket", {
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
-    });
-
-    // Knowledge base (Vector database) that our orchestrator will interact with
-    const nodArchivesKB = new bedrock.VectorKnowledgeBase(
-      this,
-      "NodArchivesKB",
-      {
-        embeddingsModel:
-          bedrock.BedrockFoundationModel.TITAN_EMBED_TEXT_V2_1024,
-        instruction:
-          "Use this knowledge base to answer questions about the Tiberian Sun universe.",
-      },
-    );
-
-    // Data source - connects KB and S3
-    new bedrock.S3DataSource(this, "NodArchivesDataSource", {
-      bucket: nodArchivesBucket,
-      knowledgeBase: nodArchivesKB,
-      dataSourceName: "NodArchivesDataSource",
-      chunkingStrategy: bedrock.ChunkingStrategy.FIXED_SIZE,
-    });
 
     // Lambda orchestrator
     const cabalCore = new PythonFunction(this, "CabalCore", {
@@ -46,7 +22,7 @@ export class CabalStack extends cdk.Stack {
       handler: "handler",
       timeout: cdk.Duration.seconds(60),
       environment: {
-        KNOWLEDGE_BASE_ID: nodArchivesKB.knowledgeBaseId,
+        KNOWLEDGE_BASE_ID: props.nodArchivesKnowledgeBaseId,
         // Note that:
         // - Anthropic requires a manual access request via the console
         // - We pick Claude Haiku over Sonnet for cost efficiency since
@@ -79,7 +55,7 @@ export class CabalStack extends cdk.Stack {
         effect: iam.Effect.ALLOW,
         actions: ["bedrock:Retrieve"],
         resources: [
-          `arn:aws:bedrock:${this.region}:${this.account}:knowledge-base/${nodArchivesKB.knowledgeBaseId}`,
+          `arn:aws:bedrock:${this.region}:${this.account}:knowledge-base/${props.nodArchivesKnowledgeBaseId}`,
         ],
       }),
     );

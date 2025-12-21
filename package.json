@@ -1,7 +1,7 @@
 {
   "name": "cabal-ai-agent",
   "version": "1.0.0",
-  "description": "A full-stack AI agent monorepo, built for the universe of Command and Conquer: Tiberian Sun.",
+  "description": "A full-stack AI agent monorepo, written for the universe of Command and Conquer: Tiberian Sun.",
   "license": "MIT",
   "author": "Yao-Hui Chua <hello@yao.page> (https://yao.page)",
   "private": true,
