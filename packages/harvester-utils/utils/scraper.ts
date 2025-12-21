@@ -5,7 +5,7 @@ import path from "path";
 import {
   CONTENT_EXCLUDE_TAGS,
   CONTENT_INCLUDE_TAGS,
-  HARVESTED_DATA_DIR,
+  HARVESTED_OUTPUT_DIR,
 } from "../constants";
 import { fetchHtml } from "./fetcher";
 
@@ -41,7 +41,7 @@ export async function scrapePage(url: string, pageData: CheerioAPI) {
     const fileContent = `SUBJECT: ${title}\n\nURL: ${url}\n\n----------------------------------------\n\n${textContent}`;
 
     // Save content to a file
-    const filePath = path.join(HARVESTED_DATA_DIR, cleanFilename(title));
+    const filePath = path.join(HARVESTED_OUTPUT_DIR, cleanFilename(title));
     await outputFile(filePath, fileContent);
 
     console.log(

@@ -1,5 +1,5 @@
 {
-  "name": "@cabal-ai-agent/ui",
+  "name": "@cabal-ai-agent/montauk-ui",
   "version": "1.0.0",
   "description": "Front-end web UI package for the CABAL AI Agent.",
   "license": "MIT",

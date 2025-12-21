@@ -1,8 +1,8 @@
 {
-  "name": "@cabal-ai-agent/toolkit",
+  "name": "@cabal-ai-agent/harvester-utils",
   "version": "1.0.0",
   "private": true,
-  "description": "Toolkit package for the CABAL AI Agent.",
+  "description": "A utility package for the CABAL AI Agent. Primarily contains modules for web crawling and scraping.",
   "license": "MIT",
   "author": "Yao-Hui Chua <hello@yao.page> (https://yao.page)",
   "type": "commonjs",

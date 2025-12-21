@@ -12,19 +12,19 @@ TBA
 
 This project is a monorepo managed with NPM workspaces. It comprises several packages.
 
-### @cabal-ai-agent/infra
-
-TypeScript CDK package containing AWS resource definitions (e.g. S3, Bedrock, Lambda).
-
-### @cabal-ai-agent/core
+### @cabal-ai-agent/core-backend
 
 Python LangGraph + LangChain package powering CABAL's agent runtime. Think of this as the server-side (AWS Lambda) backend.
 
-### @cabal-ai-agent/ui
+### @cabal-ai-agent/mcv-infra
+
+TypeScript CDK package containing AWS resource definitions (e.g. S3, Bedrock, Lambda).
+
+### @cabal-ai-agent/montauk-ui
 
 TypeScript React package powering CABAL's UI. Think of this as the client-side (browser) frontend.
 
-### @cabal-ai-agent/toolkit
+### @cabal-ai-agent/harvester-utils
 
 TypeScript package containing utilities for miscellaneous needs (e.g. web crawling and scraping for CABAL's data archives).
 

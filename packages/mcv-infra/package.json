@@ -1,7 +1,7 @@
 {
-  "name": "@cabal-ai-agent/infra",
+  "name": "@cabal-ai-agent/mcv-infra",
   "version": "1.0.0",
-  "description": "Infrastructure package for the CABAL AI agent.",
+  "description": "Infrastructure package for the CABAL AI agent. Deploys AWS resources with CDK.",
   "license": "MIT",
   "author": "Yao-Hui Chua <hello@yao.page> (https://yao.page)",
   "private": true,

@@ -2,7 +2,7 @@ import path from "path";
 
 export const USER_AGENT = "CabalToolkitHarvester/1.0 (hello@yao.page)";
 
-export const HARVESTED_DATA_DIR = path.join(__dirname, "/harvested");
+export const HARVESTED_OUTPUT_DIR = path.join(__dirname, "/harvested");
 
 export const CONTENT_INCLUDE_TAGS = "p, h2, h3, ul, table, figure";
 

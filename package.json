@@ -1,7 +1,7 @@
 {
   "name": "cabal-ai-agent",
   "version": "1.0.0",
-  "description": "An AI agent built for the universe of Command and Conquer: Tiberian Sun.",
+  "description": "A full-stack AI agent monorepo, built for the universe of Command and Conquer: Tiberian Sun.",
   "license": "MIT",
   "author": "Yao-Hui Chua <hello@yao.page> (https://yao.page)",
   "private": true,
@@ -9,10 +9,9 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces",
-    "install:all": "npm install && pip install -r packages/core/requirements.txt",
-    "ui-start": "npm start --workspaces=packages/ui",
-    "infra-deploy": "npm run deploy --workspace=packages/infra",
+    "install:all": "npm install && pip install -r packages/core-backend/requirements.txt",
+    "ui-start": "npm start --workspaces=packages/montauk-ui",
+    "infra-deploy": "npm run deploy --workspace=packages/mcv-infra",
     "format": "prettier --write \"**/*.{ts,tsx,json}\""
   },
   "devDependencies": {
