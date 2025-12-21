@@ -9,7 +9,8 @@
   "scripts": {
     "compile": "tsc",
     "cdk": "cdk",
-    "deploy": "cdk deploy"
+    "deploy": "cdk deploy",
+    "build-deploy": "tsc && cdk deploy"
   },
   "dependencies": {
     "@aws-cdk/aws-lambda-python-alpha": "^2.232.1-alpha.0",

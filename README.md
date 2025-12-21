@@ -18,7 +18,7 @@ TypeScript CDK package containing AWS resource definitions (e.g. S3, Bedrock, La
 
 ### @cabal-ai-agent/core
 
-Python LangGraph package powering CABAL's agent runtime. Think of this as the server-side (AWS Lambda) backend.
+Python LangGraph + LangChain package powering CABAL's agent runtime. Think of this as the server-side (AWS Lambda) backend.
 
 ### @cabal-ai-agent/ui
 

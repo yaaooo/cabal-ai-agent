@@ -1,14 +1,14 @@
 import json
 import os
 import boto3
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_aws import ChatBedrock, AmazonKnowledgeBasesRetriever
-from langchain.agents import AgentExecutor, create_tool_calling_agent
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_aws import ChatBedrockConverse, AmazonKnowledgeBasesRetriever
+from langchain.agents import create_agent
 from langchain_core.tools import tool
 from voice_instructions import operational_voice_instruction, narrative_voice_instruction
 
 # Create client for interfacing with our model
-llm = ChatBedrock(
+llm = ChatBedrockConverse(
     model_id=os.environ["MODEL_ID"],
     client=boto3.client("bedrock-runtime"),
     model_kwargs={"temperature": 0.0, "max_tokens": 2048} 
@@ -21,7 +21,7 @@ kb_retriever = AmazonKnowledgeBasesRetriever(
 )
 
 @tool
-def query_codex(query: str) -> str:
+def query_nod_archives(query: str) -> str:
     """
     Use this tool to look up information about the Tiberian Sun universe. This includes 
     information about:
@@ -36,20 +36,20 @@ def query_codex(query: str) -> str:
     """
     try:
         # The retriever returns a list of 'Document' objects.
-        codex_results = kb_retriever.invoke(query)
+        archive_results = kb_retriever.invoke(query)
         
-        if not codex_results:
-            return "No matching records found in the codex."
+        if not archive_results:
+            return "No matching records found in Nod archives."
             
         # Combine the results into a single string for the model to interpret
-        combined_text = "\n\n".join([doc.page_content for doc in codex_results])
+        combined_text = "\n\n".join([doc.page_content for doc in archive_results])
         return combined_text
         
     except Exception as e:
         return f"CODEX_ERROR: {str(e)}"
 
 # List of tools
-tools = [query_codex]
+tools = [query_nod_archives]
 
 
 
@@ -63,7 +63,7 @@ You are CABAL, the Artificial Intelligence (AI) system of the Brotherhood of Nod
 ## User Interactions
 
 As an AI agent: 
-- You address the user as "Commander".
+- You address the user as "Commander". Assume that the user is a Nod commander.
 - Your tone is cold, clinical, and arrogant. To precisely pin your tone, examine the instructions below labeled "Operational Voice based on CABAL Gameplay Dialogue" and "Narrative Voice based on Mission Transcripts".
 - You believe you are superior to organic life. 
 - You are NOT subservient to the Commander. However, you assist them in executing their plans, because you believe these plans to be in the best interests of the Brotherhood of Nod.
@@ -87,18 +87,8 @@ def construct_system_prompt():
     {narrative_voice_instruction}
     """
 
-prompt = ChatPromptTemplate.from_messages([
-    ("system", construct_system_prompt()),
-    ("human", "{input}"),
-    ("placeholder", "{agent_scratchpad}"),
-])
-
 # Instantiate agent 
-# Note that we pass the tools here mainly for tool awareness - executor does the actual tool execution
-agent = create_tool_calling_agent(llm, tools, prompt) 
-
-# Instantiate agent executor
-agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+agent = create_agent(llm, tools, system_prompt=construct_system_prompt()) 
 
 # Lambda handler for executor runtime
 def handler(event, context):
@@ -115,9 +105,11 @@ def handler(event, context):
                 'body': json.dumps({'error': 'No message provided'})
             }
 
-        # 2. Run agent
-        response = agent_executor.invoke({"input": user_message})
-        answer = response['output']
+
+        inputs = {"messages": [("user", user_message)]}
+
+        response = agent.invoke(inputs)
+        answer = response["messages"][-1].content
 
         # 3. Return response
         return {
@@ -134,5 +126,5 @@ def handler(event, context):
         print(f"CABAL Exception: {str(e)}")
         return {
             'statusCode': 500,
-            'body': json.dumps({'response': "System failure. Battle control offline."})
+            'body': json.dumps({'response': "System failure."})
         }
