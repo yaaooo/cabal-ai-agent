@@ -7,12 +7,14 @@ import { PythonFunction } from "@aws-cdk/aws-lambda-python-alpha";
 import * as path from "path";
 
 interface CabalComputeProps extends cdk.StackProps {
-  nodArchivesKnowledgeBaseId: string;
+  nodKBId: string;
 }
 
 export class CabalComputeStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: CabalComputeProps) {
     super(scope, id, props);
+
+    const { nodKBId } = props;
 
     // Lambda orchestrator
     const cabalCore = new PythonFunction(this, "CabalCore", {
@@ -22,7 +24,7 @@ export class CabalComputeStack extends cdk.Stack {
       handler: "handler",
       timeout: cdk.Duration.seconds(60),
       environment: {
-        KNOWLEDGE_BASE_ID: props.nodArchivesKnowledgeBaseId,
+        KNOWLEDGE_BASE_ID: nodKBId,
         // Note that:
         // - Anthropic requires a manual access request via the console
         // - We pick Claude Haiku over Sonnet for cost efficiency since
@@ -55,7 +57,7 @@ export class CabalComputeStack extends cdk.Stack {
         effect: iam.Effect.ALLOW,
         actions: ["bedrock:Retrieve"],
         resources: [
-          `arn:aws:bedrock:${this.region}:${this.account}:knowledge-base/${props.nodArchivesKnowledgeBaseId}`,
+          `arn:aws:bedrock:${this.region}:${this.account}:knowledge-base/${nodKBId}`,
         ],
       }),
     );

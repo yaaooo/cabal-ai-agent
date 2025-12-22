@@ -2,17 +2,36 @@
 import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 import { account, region } from "./env";
-import { CabalDataStack } from "../lib/cabal-data-stack";
 import { CabalComputeStack } from "../lib/cabal-compute-stack";
+import { CabalStorageStack } from "../lib/cabal-storage-stack";
+import { CabalKnowledgeStack } from "../lib/cabal-knowledge-stack";
 
 const app = new cdk.App();
 const env = { account, region };
 
-// Create data stack (S3, Bedrock)
-const cabalDataStack = new CabalDataStack(app, "CabalStack", { env });
+// Create storage stack (S3, OpenSearch)
+const cabalStorageStack = new CabalStorageStack(app, "CabalStorageStack", {
+  env,
+});
+const { nodS3Bucket, nodOpenSearchDomain, nodKBRole } = cabalStorageStack;
+
+// Create knowledge stack (Bedrock KB, Bedrock Data Source)
+const cabalKnowledgeStack = new CabalKnowledgeStack(
+  app,
+  "CabalKnowledgeStack",
+  {
+    env,
+    nodS3Bucket,
+    nodOpenSearchDomain,
+    nodKBRole,
+  },
+);
+const { nodKBId } = cabalKnowledgeStack;
+cabalKnowledgeStack.addDependency(cabalStorageStack);
 
 // Create compute stack (Lambda, API Gateway)
-new CabalComputeStack(app, "CabalComputeStack", {
+const cabalComputeStack = new CabalComputeStack(app, "CabalComputeStack", {
   env,
-  nodArchivesKnowledgeBaseId: cabalDataStack.nodArchivesKnowledgeBaseId,
+  nodKBId,
 });
+cabalComputeStack.addDependency(cabalKnowledgeStack);

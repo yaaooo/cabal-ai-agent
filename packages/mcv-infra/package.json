@@ -7,9 +7,11 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "compile": "tsc",
+    "build": "tsc",
     "cdk": "cdk",
     "deploy": "cdk deploy",
+    "build-deploy-storage": "tsc && cdk deploy CabalStorageStack",
+    "build-deploy-knowledge": "tsc && cdk deploy CabalStorageStack CabalKnowledgeStack",
     "build-deploy": "tsc && cdk deploy"
   },
   "dependencies": {

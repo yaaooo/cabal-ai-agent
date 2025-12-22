@@ -7,8 +7,8 @@
   "author": "Yao-Hui Chua <hello@yao.page> (https://yao.page)",
   "type": "commonjs",
   "scripts": {
-    "compile": "tsc",
-    "harvest": "npm run compile && node dist/index.js"
+    "build": "tsc",
+    "harvest": "npm run build && node dist/index.js"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
