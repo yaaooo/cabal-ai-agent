@@ -13,9 +13,9 @@ const env = { account, region };
 const cabalStorageStack = new CabalStorageStack(app, "CabalStorageStack", {
   env,
 });
-const { nodS3Bucket, nodOpenSearchDomain, nodKBRole } = cabalStorageStack;
+const { nodS3Bucket, nodOpenSearchDomain } = cabalStorageStack;
 
-// Create knowledge stack (Bedrock KB, Bedrock Data Source)
+// Create knowledge stack (Bedrock)
 const cabalKnowledgeStack = new CabalKnowledgeStack(
   app,
   "CabalKnowledgeStack",
@@ -23,7 +23,6 @@ const cabalKnowledgeStack = new CabalKnowledgeStack(
     env,
     nodS3Bucket,
     nodOpenSearchDomain,
-    nodKBRole,
   },
 );
 const { nodKBId } = cabalKnowledgeStack;

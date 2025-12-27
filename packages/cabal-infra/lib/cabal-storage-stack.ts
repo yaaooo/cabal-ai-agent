@@ -9,7 +9,6 @@ import { getEmbeddingModelArn } from "./util";
 export class CabalStorageStack extends cdk.Stack {
   public readonly nodS3Bucket: s3.Bucket;
   public readonly nodOpenSearchDomain: opensearch.Domain;
-  public readonly nodKBRole: Role;
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -46,48 +45,6 @@ export class CabalStorageStack extends cdk.Stack {
         enforceHttps: true,
         removalPolicy: cdk.RemovalPolicy.DESTROY,
       },
-    );
-
-    // Pre-define a Bedrock KB role. We'll load this role with
-    // all necessary permissions right below.
-    this.nodKBRole = new Role(this, "NodKBRole", {
-      assumedBy: new ServicePrincipal("bedrock.amazonaws.com"),
-    });
-
-    // Allow the KB role to take HTTP actions on OpenSearch.
-    this.nodKBRole.addToPolicy(
-      new PolicyStatement({
-        actions: ["es:ESHttp*"],
-        resources: [`${this.nodOpenSearchDomain.domainArn}/*`],
-      }),
-    );
-
-    // Our KB also needs to do a pre-flight check to confirm that
-    // the OpenSearch domain exists, before it can create the
-    // knowledge base.
-    this.nodKBRole.addToPolicy(
-      new PolicyStatement({
-        actions: [
-          "es:DescribeDomain",
-          "es:DescribeElasticsearchDomain",
-          "es:ListDomainNames",
-        ],
-        resources: [this.nodOpenSearchDomain.domainArn],
-      }),
-    );
-
-    // Set up read access on the S3 bucket for the KB role
-    // with a resource policy.
-    this.nodS3Bucket.grantRead(this.nodKBRole);
-
-    // Grant the KB role access to the Titan Embedding model
-    // with an identity policy, which the KB will use for
-    // vectorizing the raw S3 data.
-    this.nodKBRole.addToPolicy(
-      new PolicyStatement({
-        actions: ["bedrock:InvokeModel"],
-        resources: [getEmbeddingModelArn(this.region)],
-      }),
     );
   }
 }
