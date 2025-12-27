@@ -3,5 +3,5 @@
   "compilerOptions": {
     "outDir": "dist",
   },
-  "exclude": ["cdk.out"]
+  "exclude": ["cdk.out", "lib/*.personal.ts"]
 }

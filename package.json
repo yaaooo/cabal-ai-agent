@@ -9,9 +9,9 @@
     "packages/*"
   ],
   "scripts": {
-    "install:all": "npm install && pip install -r packages/core-backend/requirements.txt",
+    "infra-deploy": "npm run deploy --workspace=packages/cabal-infra",
     "ui-start": "npm start --workspaces=packages/montauk-ui",
-    "infra-deploy": "npm run deploy --workspace=packages/mcv-infra",
+    "install:all": "npm install && pip install -r packages/cabal-core/requirements.txt",
     "format": "prettier --write \"**/*.{ts,tsx,json}\""
   },
   "devDependencies": {

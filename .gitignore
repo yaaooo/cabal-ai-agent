@@ -4,3 +4,4 @@ dist/
 cdk.out
 harvested
 .DS_Store
+*.personal.*

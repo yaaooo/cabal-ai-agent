@@ -90,7 +90,7 @@ def construct_system_prompt():
 # Instantiate agent 
 agent = create_agent(llm, tools, system_prompt=construct_system_prompt()) 
 
-# Lambda handler for executor runtime
+# Lambda handler for agent runtime
 def handler(event, context):
     print("Received event:", json.dumps(event))
     

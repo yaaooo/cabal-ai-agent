@@ -18,7 +18,7 @@ export class CabalComputeStack extends cdk.Stack {
 
     // Lambda orchestrator
     const cabalCore = new PythonFunction(this, "CabalCore", {
-      entry: path.join(__dirname, "../../../core-backend"),
+      entry: path.join(__dirname, "../../../cabal-core"),
       runtime: lambda.Runtime.PYTHON_3_12,
       index: "cabal.py",
       handler: "handler",
