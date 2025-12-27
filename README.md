@@ -2,7 +2,7 @@
 
 An AI agent built for the universe of [Command and Conquer: Tiberian Sun](https://en.wikipedia.org/wiki/Command_%26_Conquer%3A_Tiberian_Sun). As the name suggests, this agent is configured to assume the personality of [CABAL](https://cnc.fandom.com/wiki/Computer_Assisted_Biologically_Augmented_Lifeform).
 
-Built with React + TypeScript, Langchain + Python, and AWS CDK constructs (Bedrock, Lambda, etc). 
+Built with React in TypeScript, LangGraph in Python, and various AWS CDK constructs (e.g. S3, Bedrock, Lambda). 
 
 ## Usage
 
@@ -22,7 +22,7 @@ TypeScript package supporting web crawling and scraping capabilities for CABAL's
 
 ### @cabal-ai-agent/cabal-infra
 
-TypeScript CDK package containing AWS resource definitions (e.g. S3, Bedrock, Lambda).
+TypeScript CDK package containing AWS resource definitions. Includes a Storage stack (S3, OpenSearch), a Knowledge stack (Bedrock), and a Compute stack (Lambda, API Gateway).
 
 ### @cabal-ai-agent/montauk-ui
 

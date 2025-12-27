@@ -42,7 +42,7 @@ export class CabalKnowledgeStack extends cdk.Stack {
         type: "OPENSEARCH_MANAGED_CLUSTER",
         opensearchManagedClusterConfiguration: {
           domainArn: nodOpenSearchDomain.domainArn,
-          domainEndpoint: nodOpenSearchDomain.domainEndpoint,
+          domainEndpoint: `https://${nodOpenSearchDomain.domainEndpoint}`,
           // We specify the index, vector, text, and metadata label so
           // that the KB knows how to write this data to OpenSearch.
           vectorIndexName: "nod-index",

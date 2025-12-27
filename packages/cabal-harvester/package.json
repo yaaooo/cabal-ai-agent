@@ -2,7 +2,7 @@
   "name": "@cabal-ai-agent/cabal-harvester",
   "version": "1.0.0",
   "private": true,
-  "description": "A utility package for the CABAL AI Agent. Primarily contains code for web crawling and scraping.",
+  "description": "A utility package for the CABAL AI Agent. Contains code for web crawling and scraping.",
   "license": "MIT",
   "author": "Yao-Hui Chua <hello@yao.page> (https://yao.page)",
   "type": "commonjs",

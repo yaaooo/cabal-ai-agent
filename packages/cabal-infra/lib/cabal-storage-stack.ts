@@ -3,12 +3,7 @@ import { Construct } from "constructs";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as opensearch from "aws-cdk-lib/aws-opensearchservice";
 import { EbsDeviceVolumeType } from "aws-cdk-lib/aws-ec2";
-import {
-  Effect,
-  PolicyStatement,
-  Role,
-  ServicePrincipal,
-} from "aws-cdk-lib/aws-iam";
+import { PolicyStatement, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 import { getEmbeddingModelArn } from "./util";
 
 export class CabalStorageStack extends cdk.Stack {
@@ -59,18 +54,25 @@ export class CabalStorageStack extends cdk.Stack {
       assumedBy: new ServicePrincipal("bedrock.amazonaws.com"),
     });
 
-    // Set up access to the Open Search Domain for the KB role.
-    // Note that this has to be done *here*. We cannot simply
-    // pass the KB role down to CabalKnowledgeStack and add
-    // a resource policy later, because that would result
-    // in a circular dependency between both stacks.
-    this.nodOpenSearchDomain.addAccessPolicies(
+    // Allow the KB role to take HTTP actions on OpenSearch.
+    this.nodKBRole.addToPolicy(
       new PolicyStatement({
-        effect: Effect.ALLOW,
-        principals: [this.nodKBRole],
-        // Allow the KB role to take HTTP actions on OpenSearch.
         actions: ["es:ESHttp*"],
         resources: [`${this.nodOpenSearchDomain.domainArn}/*`],
+      }),
+    );
+
+    // Our KB also needs to do a pre-flight check to confirm that
+    // the OpenSearch domain exists, before it can create the
+    // knowledge base.
+    this.nodKBRole.addToPolicy(
+      new PolicyStatement({
+        actions: [
+          "es:DescribeDomain",
+          "es:DescribeElasticsearchDomain",
+          "es:ListDomainNames",
+        ],
+        resources: [this.nodOpenSearchDomain.domainArn],
       }),
     );
 
