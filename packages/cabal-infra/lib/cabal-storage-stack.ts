@@ -3,8 +3,13 @@ import { Construct } from "constructs";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as opensearch from "aws-cdk-lib/aws-opensearchservice";
 import { EbsDeviceVolumeType } from "aws-cdk-lib/aws-ec2";
-import { PolicyStatement, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
-import { getEmbeddingModelArn } from "./util";
+import { Secret } from "aws-cdk-lib/aws-secretsmanager";
+import {
+  OPENSEARCH_DASHBOARD_PASSWORD_KEY,
+  OPENSEARCH_DASHBOARD_USERNAME,
+  OPENSEARCH_DASHBOARD_USERNAME_KEY,
+} from "./constants";
+import { AnyPrincipal, Effect, PolicyStatement } from "aws-cdk-lib/aws-iam";
 
 export class CabalStorageStack extends cdk.Stack {
   public readonly nodS3Bucket: s3.Bucket;
@@ -17,6 +22,23 @@ export class CabalStorageStack extends cdk.Stack {
     this.nodS3Bucket = new s3.Bucket(this, "NodS3Bucket", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
+    });
+
+    // Create a username + password combination on Secrets Manager for
+    // accessing the OpenSearch dashboard. In our browser, we'll need
+    // to look up these values on the AWS console before we log in.
+    const nodUserSecret = new Secret(this, "NodUserSecret", {
+      generateSecretString: {
+        secretStringTemplate: JSON.stringify({
+          [OPENSEARCH_DASHBOARD_USERNAME_KEY]: OPENSEARCH_DASHBOARD_USERNAME,
+        }),
+        generateStringKey: OPENSEARCH_DASHBOARD_PASSWORD_KEY,
+        // Note that "The master user password must contain at least
+        // one uppercase letter, one lowercase letter, one number,
+        // and one special character."
+        requireEachIncludedType: true,
+        excludeCharacters: "\"'\\/@",
+      },
     });
 
     // Create an OpenSearch Domain which will store the vectorized data.
@@ -44,7 +66,29 @@ export class CabalStorageStack extends cdk.Stack {
         encryptionAtRest: { enabled: true },
         enforceHttps: true,
         removalPolicy: cdk.RemovalPolicy.DESTROY,
+        fineGrainedAccessControl: {
+          masterUserName: nodUserSecret
+            .secretValueFromJson(OPENSEARCH_DASHBOARD_USERNAME_KEY)
+            .unsafeUnwrap(),
+          masterUserPassword: nodUserSecret.secretValueFromJson(
+            OPENSEARCH_DASHBOARD_PASSWORD_KEY,
+          ),
+        },
       },
+    );
+    // Ensure secret is ready before setting up OpenSearch domain
+    this.nodOpenSearchDomain.node.addDependency(nodUserSecret);
+
+    // Allow general access to the OpenSearch Dashboard's landing page.
+    // This is still safe since the fine-grained access control
+    // defined above will enforce a login guardrail.
+    this.nodOpenSearchDomain.addAccessPolicies(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        principals: [new AnyPrincipal()],
+        actions: ["es:ESHttp*"],
+        resources: [`${this.nodOpenSearchDomain.domainArn}/*`],
+      }),
     );
   }
 }

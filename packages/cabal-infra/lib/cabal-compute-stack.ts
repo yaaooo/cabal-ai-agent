@@ -26,7 +26,7 @@ export class CabalComputeStack extends cdk.Stack {
       environment: {
         KNOWLEDGE_BASE_ID: nodKBId,
         // Note that:
-        // - Anthropic requires a manual access request via the console
+        // - Anthropic models require manual access requests via the console
         // - We pick Claude Haiku over Sonnet for cost efficiency since
         //   CABAL may receive higher volume as a chatbot
         MODEL_ID: "us.anthropic.claude-3-5-haiku-20241022-v1:0",

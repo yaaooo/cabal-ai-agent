@@ -5,17 +5,33 @@ import { account, region } from "./env";
 import { CabalComputeStack } from "../lib/cabal-compute-stack";
 import { CabalStorageStack } from "../lib/cabal-storage-stack";
 import { CabalKnowledgeStack } from "../lib/cabal-knowledge-stack";
+import { CabalKnowledgeIdentityStack } from "../lib/cabal-knowledge-identity-stack";
 
 const app = new cdk.App();
 const env = { account, region };
 
-// Create storage stack (S3, OpenSearch)
+// Create storage stack (S3, OpenSearch, Secrets)
 const cabalStorageStack = new CabalStorageStack(app, "CabalStorageStack", {
   env,
 });
 const { nodS3Bucket, nodOpenSearchDomain } = cabalStorageStack;
 
-// Create knowledge stack (Bedrock)
+// Create knowledge identity stack (Bedrock KB role)
+// Note: We separate this from the main knowledge stack below so that
+// we can map the created IAM role to the OpenSearch backend role.
+const cabalKnowledgeIdentityStack = new CabalKnowledgeIdentityStack(
+  app,
+  "CabalKnowledgeIdentityStack",
+  {
+    env,
+    nodS3Bucket,
+    nodOpenSearchDomain,
+  },
+);
+const { nodKBRole } = cabalKnowledgeIdentityStack;
+cabalKnowledgeIdentityStack.addDependency(cabalStorageStack);
+
+// Create knowledge stack (Bedrock KB)
 const cabalKnowledgeStack = new CabalKnowledgeStack(
   app,
   "CabalKnowledgeStack",
@@ -23,10 +39,11 @@ const cabalKnowledgeStack = new CabalKnowledgeStack(
     env,
     nodS3Bucket,
     nodOpenSearchDomain,
+    nodKBRole,
   },
 );
 const { nodKBId } = cabalKnowledgeStack;
-cabalKnowledgeStack.addDependency(cabalStorageStack);
+cabalKnowledgeStack.addDependency(cabalKnowledgeIdentityStack);
 
 // Create compute stack (Lambda, API Gateway)
 const cabalComputeStack = new CabalComputeStack(app, "CabalComputeStack", {
