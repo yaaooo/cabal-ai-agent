@@ -17,8 +17,9 @@ const cabalStorageStack = new CabalStorageStack(app, "CabalStorageStack", {
 const { nodS3Bucket, nodOpenSearchDomain } = cabalStorageStack;
 
 // Create knowledge identity stack (Bedrock KB role)
-// Note: We separate this from the main knowledge stack below so that
-// we can map the created IAM role to the OpenSearch backend role.
+// Note: We separate this from the knowledge stack below so that we can
+// manually map the ARN of KB IAM role to a backend role on OpenSearch
+// *before* creating the actual KB. KB creation would fail otherwise.
 const cabalKnowledgeIdentityStack = new CabalKnowledgeIdentityStack(
   app,
   "CabalKnowledgeIdentityStack",

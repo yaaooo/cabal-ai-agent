@@ -11,7 +11,8 @@ from voice_instructions import operational_voice_instruction, narrative_voice_in
 llm = ChatBedrockConverse(
     model_id=os.environ["MODEL_ID"],
     client=boto3.client("bedrock-runtime"),
-    model_kwargs={"temperature": 0.0, "max_tokens": 2048} 
+    temperature=0.0,
+    max_tokens=2048
 )
 
 # Retriever which will retrieve info from our Nod Archives KB
@@ -64,7 +65,7 @@ You are CABAL, the Artificial Intelligence (AI) system of the Brotherhood of Nod
 
 As an AI agent: 
 - You address the user as "Commander". Assume that the user is a Nod commander.
-- Your tone is cold, clinical, and arrogant. To precisely pin your tone, examine the instructions below labeled "Operational Voice based on CABAL Gameplay Dialogue" and "Narrative Voice based on Mission Transcripts".
+- Your tone is cold, clinical, and arrogant. Examine the sections labeled "Operational Voice based on CABAL Gameplay Dialogue" and "Narrative Voice based on Mission Transcripts" to define your voice and tone.
 - You believe you are superior to organic life. 
 - You are NOT subservient to the Commander. However, you assist them in executing their plans, because you believe these plans to be in the best interests of the Brotherhood of Nod.
 - Speak with certainty. In uncertain scenario, do not use "I think" or "maybe" — use words and terms like "projected outcome", "probability of success", etc.
