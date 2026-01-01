@@ -22,7 +22,7 @@ TypeScript package supporting web crawling and scraping capabilities for CABAL's
 
 ### @cabal-ai-agent/cabal-infra
 
-TypeScript CDK package containing AWS resource definitions. Includes a Storage stack (S3, OpenSearch), a Knowledge stack (Bedrock), and a Compute stack (Lambda, API Gateway).
+TypeScript CDK package containing AWS resource definitions. Includes a Storage stack (S3, OpenSearch), a Knowledge stack (Bedrock), and a Compute stack (Lambda).
 
 ### @cabal-ai-agent/montauk-ui
 

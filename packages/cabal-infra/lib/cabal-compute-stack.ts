@@ -2,7 +2,6 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { PythonFunction } from "@aws-cdk/aws-lambda-python-alpha";
 import * as path from "path";
 
@@ -30,6 +29,19 @@ export class CabalComputeStack extends cdk.Stack {
         // - We pick Claude Haiku over Sonnet for cost efficiency since
         //   CABAL may receive higher volume as a chatbot
         MODEL_ID: "us.anthropic.claude-3-5-haiku-20241022-v1:0",
+      },
+    });
+
+    // Define a lambda function URL for response streaming. We use this
+    // instead of API gateway for simplicity
+    const functionUrl = cabalCore.addFunctionUrl({
+      authType: lambda.FunctionUrlAuthType.AWS_IAM,
+      invokeMode: lambda.InvokeMode.RESPONSE_STREAM,
+      cors: {
+        // TODO: Update origins to only accept CABAL client
+        allowedOrigins: ["*"],
+        allowedMethods: [lambda.HttpMethod.ALL],
+        allowedHeaders: ["*"],
       },
     });
 
@@ -79,24 +91,10 @@ export class CabalComputeStack extends cdk.Stack {
       }),
     );
 
-    // API gateway interface
-    const cabalApi = new apigateway.LambdaRestApi(this, "CabalEndpoint", {
-      handler: cabalCore,
-      proxy: false,
-      defaultCorsPreflightOptions: {
-        // To be updated
-        allowOrigins: apigateway.Cors.ALL_ORIGINS,
-        allowMethods: apigateway.Cors.ALL_METHODS,
-      },
-    });
-
-    // Chat endpoint
-    const cabalChatEndpoint = cabalApi.root.addResource("chat");
-    cabalChatEndpoint.addMethod("POST"); // POST /chat calls the Lambda
-
-    // Output the endpoint URL
-    new cdk.CfnOutput(this, "CabalApiUrl", {
-      value: cabalApi.url,
+    // Print out the lambda function URL
+    new cdk.CfnOutput(this, "CabalFunctionUrl", {
+      value: functionUrl.url,
+      description: "CABAL Lambda Function URL",
     });
   }
 }

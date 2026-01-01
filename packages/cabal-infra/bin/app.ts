@@ -46,7 +46,7 @@ const cabalKnowledgeStack = new CabalKnowledgeStack(
 const { nodKBId } = cabalKnowledgeStack;
 cabalKnowledgeStack.addDependency(cabalKnowledgeIdentityStack);
 
-// Create compute stack (Lambda, API Gateway)
+// Create compute stack (Lambda)
 const cabalComputeStack = new CabalComputeStack(app, "CabalComputeStack", {
   env,
   nodKBId,
