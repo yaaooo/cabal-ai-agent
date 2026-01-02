@@ -3,3 +3,10 @@
 export const OPENSEARCH_DASHBOARD_USERNAME_KEY = "username";
 export const OPENSEARCH_DASHBOARD_USERNAME = "nodUser";
 export const OPENSEARCH_DASHBOARD_PASSWORD_KEY = "password";
+
+// Lambda Web Adapter Layer constants. Note that these are
+// hosted on AWS's public account
+// See: https://github.com/awslabs/aws-lambda-web-adapter
+export const LAMBDA_WEB_ADAPTER_ACCOUNT = "753240598075";
+export const LAMBDA_WEB_ADAPTER_LAYER_NAME = "LambdaAdapterLayerX86";
+export const LAMBDA_WEB_ADAPTER_VERSION = 24;

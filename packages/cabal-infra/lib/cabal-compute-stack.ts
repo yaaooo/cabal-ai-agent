@@ -4,6 +4,11 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as iam from "aws-cdk-lib/aws-iam";
 import { PythonFunction } from "@aws-cdk/aws-lambda-python-alpha";
 import * as path from "path";
+import {
+  LAMBDA_WEB_ADAPTER_ACCOUNT,
+  LAMBDA_WEB_ADAPTER_LAYER_NAME,
+  LAMBDA_WEB_ADAPTER_VERSION,
+} from "./constants";
 
 interface CabalComputeProps extends cdk.StackProps {
   nodKBId: string;
@@ -15,24 +20,50 @@ export class CabalComputeStack extends cdk.Stack {
 
     const { nodKBId } = props;
 
-    // Lambda orchestrator
+    // Reference a Lambda Web Adapter (LWA) layer which translates incoming
+    // Lambda events into standard HTTP requests that our Uvicorn server
+    // can process. The LWA would be a sidecar process next to Uvicorn.
+    //
+    // The main benefit of using LWA is that it allows us to fashion our
+    // code the same way we write up a regular HTTP server. We avoid
+    // worrying about Lambda-specific requirements (e.g. `handler()`).
+    //
+    // This means we can more easily support response streaming without
+    // having to jump through Lambda-specific hoops.
+    //
+    // Some useful references:
+    // - https://github.com/awslabs/aws-lambda-web-adapter
+    // - https://aws.amazon.com/blogs/compute/using-response-streaming-with-aws-lambda-web-adapter-to-optimize-performance/
+    const lambdaAdapterLayer = lambda.LayerVersion.fromLayerVersionArn(
+      this,
+      "LambdaAdapterLayer",
+      `arn:aws:lambda:${this.region}:${LAMBDA_WEB_ADAPTER_ACCOUNT}:layer:${LAMBDA_WEB_ADAPTER_LAYER_NAME}:${LAMBDA_WEB_ADAPTER_VERSION}`,
+    );
+
+    // Lambda Function
     const cabalCore = new PythonFunction(this, "CabalCore", {
       entry: path.join(__dirname, "../../../cabal-core"),
       runtime: lambda.Runtime.PYTHON_3_12,
       index: "cabal.py",
-      handler: "handler",
+      handler: "run.sh",
       timeout: cdk.Duration.seconds(60),
+      // Extend Lambda with Lambda Web Adapter
+      layers: [lambdaAdapterLayer],
       environment: {
+        // Environment variables for Lambda Web Adapter
+        AWS_LWA_INVOKE_MODE: "RESPONSE_STREAM",
+        AWS_LWA_PORT: "8080",
+        // Environment variables for Lambda CABAL agent code
         KNOWLEDGE_BASE_ID: nodKBId,
-        // Note that:
-        // - Anthropic models require manual access requests via the console
+        // We define the Bedrock model we'll be using. Some notes:
+        // - Anthropic models need to be manually enabled in the console
         // - We pick Claude Haiku over Sonnet for cost efficiency since
         //   CABAL may receive higher volume as a chatbot
         MODEL_ID: "us.anthropic.claude-3-5-haiku-20241022-v1:0",
       },
     });
 
-    // Define a lambda function URL for response streaming. We use this
+    // Define a Lambda function URL for response streaming. We use this
     // instead of API gateway for simplicity
     const functionUrl = cabalCore.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.AWS_IAM,
@@ -45,7 +76,7 @@ export class CabalComputeStack extends cdk.Stack {
       },
     });
 
-    // Give lambda permissions to interact with models
+    // Give Lambda permissions to interact with models
     cabalCore.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
@@ -63,7 +94,7 @@ export class CabalComputeStack extends cdk.Stack {
       }),
     );
 
-    // Give lambda permissions to interact with KB
+    // Give Lambda permissions to interact with KB
     cabalCore.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
@@ -74,7 +105,7 @@ export class CabalComputeStack extends cdk.Stack {
       }),
     );
 
-    // Give lambda permissions to interact with AWS marketplace, see error below:
+    // Give Lambda permissions to interact with AWS marketplace, see error below:
     // "Model access is denied due to IAM user or service role is not authorized to
     // perform the required AWS Marketplace actions (aws-marketplace:ViewSubscriptions,
     // aws-marketplace:Subscribe) to enable access to this model"
@@ -91,7 +122,7 @@ export class CabalComputeStack extends cdk.Stack {
       }),
     );
 
-    // Print out the lambda function URL
+    // Print out the Lambda function URL
     new cdk.CfnOutput(this, "CabalFunctionUrl", {
       value: functionUrl.url,
       description: "CABAL Lambda Function URL",
