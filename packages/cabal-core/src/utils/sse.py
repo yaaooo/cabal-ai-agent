@@ -1,6 +1,6 @@
 import json
 from enum import StrEnum, auto
-from typing import Optional, Union, Dict, Any
+from typing import Optional, Dict, Any
 
 
 class SSEEventType(StrEnum):
