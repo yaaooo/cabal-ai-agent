@@ -5,7 +5,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from langchain_aws import ChatBedrockConverse
 from langchain.agents import create_agent
-from voice_instructions import operational_voice_instruction, narrative_voice_instruction
+from prompts import operational_voice_system_prompt, narrative_voice_system_prompt
 from tools import query_nod_archives
 from utils import format_sse, SSEEventType
 
@@ -48,8 +48,8 @@ As an AI agent:
 def construct_system_prompt():
     return f"""
     {base_instruction}
-    {operational_voice_instruction}
-    {narrative_voice_instruction}
+    {operational_voice_system_prompt}
+    {narrative_voice_system_prompt}
     """
 
 # Instantiate agent 
@@ -116,8 +116,3 @@ async def chat(request: ChatRequest):
         }
     )
 
-
-if __name__ == "__main__":
-    # Runs during direct script execution (see run.sh)
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8080)

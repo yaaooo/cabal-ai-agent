@@ -1,0 +1,10 @@
+# Ignore everything
+*
+
+# Only include what we need
+!requirements.txt
+!src/**
+
+# Exclude unwanted patterns within src
+src/**/__pycache__/
+src/**/*.pyc

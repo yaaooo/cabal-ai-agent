@@ -10,10 +10,10 @@
     "build": "tsc",
     "cdk": "cdk",
     "deploy": "cdk deploy",
-    "build-deploy-storage": "tsc && cdk deploy CabalStorageStack",
-    "build-deploy-identity": "tsc && cdk deploy CabalStorageStack CabalKnowledgeIdentityStack",
-    "build-deploy-knowledge": "tsc && cdk deploy CabalStorageStack CabalKnowledgeIdentityStack CabalKnowledgeStack",
-    "build-deploy-all": "tsc && cdk deploy --all"
+    "deploy-storage": "tsc && cdk deploy CabalStorageStack",
+    "deploy-identity": "tsc && cdk deploy CabalStorageStack CabalKnowledgeIdentityStack",
+    "deploy-knowledge": "tsc && cdk deploy CabalStorageStack CabalKnowledgeIdentityStack CabalKnowledgeStack",
+    "deploy-all": "tsc && cdk deploy --all"
   },
   "dependencies": {
     "@aws-cdk/aws-lambda-python-alpha": "^2.232.1-alpha.0",

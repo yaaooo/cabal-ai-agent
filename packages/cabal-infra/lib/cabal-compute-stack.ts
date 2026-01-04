@@ -2,13 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as iam from "aws-cdk-lib/aws-iam";
-import { PythonFunction } from "@aws-cdk/aws-lambda-python-alpha";
 import * as path from "path";
-import {
-  LAMBDA_WEB_ADAPTER_ACCOUNT,
-  LAMBDA_WEB_ADAPTER_LAYER_NAME,
-  LAMBDA_WEB_ADAPTER_VERSION,
-} from "./constants";
 
 interface CabalComputeProps extends cdk.StackProps {
   nodKBId: string;
@@ -20,40 +14,31 @@ export class CabalComputeStack extends cdk.Stack {
 
     const { nodKBId } = props;
 
-    // Reference a Lambda Web Adapter (LWA) layer which translates incoming
-    // Lambda events into standard HTTP requests that our Uvicorn server
-    // can process. The LWA would be a sidecar process next to Uvicorn.
-    //
-    // The main benefit of using LWA is that it allows us to fashion our
-    // code the same way we write up a regular HTTP server. We avoid
-    // worrying about Lambda-specific requirements (e.g. `handler()`).
-    //
-    // This means we can more easily support response streaming without
-    // having to jump through Lambda-specific hoops.
-    //
-    // Some useful references:
-    // - https://github.com/awslabs/aws-lambda-web-adapter
-    // - https://aws.amazon.com/blogs/compute/using-response-streaming-with-aws-lambda-web-adapter-to-optimize-performance/
-    const lambdaAdapterLayer = lambda.LayerVersion.fromLayerVersionArn(
-      this,
-      "LambdaAdapterLayer",
-      `arn:aws:lambda:${this.region}:${LAMBDA_WEB_ADAPTER_ACCOUNT}:layer:${LAMBDA_WEB_ADAPTER_LAYER_NAME}:${LAMBDA_WEB_ADAPTER_VERSION}`,
-    );
-
-    // Lambda Function
-    const cabalCore = new PythonFunction(this, "CabalCore", {
-      entry: path.join(__dirname, "../../../cabal-core"),
-      runtime: lambda.Runtime.PYTHON_3_12,
-      index: "cabal.py",
-      handler: "run.sh",
+    // We use the DockerImageFunction construct instead of the PythonFunction
+    // one because we're planning to operate a web server instead of a
+    // traditional Lambda handler. This also gives us more granular
+    // control over how we set up our container.
+    const cabalCore = new lambda.DockerImageFunction(this, "CabalCore", {
+      code: lambda.DockerImageCode.fromImageAsset(
+        path.join(__dirname, "../../../cabal-core"),
+        {
+          // We explicitly specify the platform to be arm64, which is the
+          // same as that of our local M1 Mac. Note that there are cost
+          // benefits associated with using arm64:
+          // https://aws.amazon.com/blogs/apn/comparing-aws-lambda-arm-vs-x86-performance-cost-and-analysis-2/
+          platform: cdk.aws_ecr_assets.Platform.LINUX_ARM64,
+        },
+      ),
+      // Ensure Lambda architecture matches Docker image
+      architecture: lambda.Architecture.ARM_64,
       timeout: cdk.Duration.seconds(60),
-      // Extend Lambda with Lambda Web Adapter
-      layers: [lambdaAdapterLayer],
+      memorySize: 512,
       environment: {
-        // Environment variables for Lambda Web Adapter
+        // Environment variables for Lambda Web Adapter (LWA)
+        // See Dockerfile in cabal-core for details
         AWS_LWA_INVOKE_MODE: "RESPONSE_STREAM",
         AWS_LWA_PORT: "8080",
-        // Environment variables for Lambda CABAL agent code
+        // Environment variables for CABAL agent code
         KNOWLEDGE_BASE_ID: nodKBId,
         // We define the Bedrock model we'll be using. Some notes:
         // - Anthropic models need to be manually enabled in the console
