@@ -1,3 +1,4 @@
+@import "../src/index.css";
 @import "tailwindcss";
 /* See https: //github.com/tajo/ladle/issues/603. The source() modifier tells the Tailwind compiler where to look for your template files so it can perform "content detection" and generate the necessary utility classes. */
 @source "../src/"; 

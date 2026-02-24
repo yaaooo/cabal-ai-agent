@@ -29,11 +29,9 @@ export default function ChatInput({ onSubmit, disabled }: ChatInputProps) {
           onKeyDown={handleKeyDown}
           disabled={disabled}
           placeholder="Enter directive..."
+          aria-label="Commander input"
           className="flex-1 bg-transparent text-neutral-200 outline-none placeholder-neutral-700 ml-1 disabled:opacity-50 disabled:cursor-not-allowed"
         />
-        {!disabled && input.trim() && (
-          <span className="text-neutral-200 cursor-blink">▊</span>
-        )}
       </div>
     </div>
   );

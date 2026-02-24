@@ -13,17 +13,17 @@ export default function CabalMessage({
 }: CabalMessageProps) {
   return (
     <div className="font-mono text-sm py-1">
-      <div>
+      <p>
         <span className="text-red-800">{">"} CABAL: </span>
         <span className="text-red-600">
           {message}
           {isStreaming && <span className="cursor-blink">▊</span>}
         </span>
-      </div>
+      </p>
       {sources && sources.length > 0 && (
-        <div className="mt-1 ml-8 space-y-0.5">
+        <ul className="mt-1 ml-8 space-y-0.5 list-none">
           {sources.map((source, index) => (
-            <div key={index} className="text-xs text-red-700">
+            <li key={index} className="text-xs text-red-700">
               <span className="text-neutral-600">[SOURCE] </span>
               <a
                 href={source.url}
@@ -33,9 +33,9 @@ export default function CabalMessage({
               >
                 {source.title}
               </a>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   );

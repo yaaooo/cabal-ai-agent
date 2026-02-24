@@ -13,17 +13,17 @@ export default function ToolCallIndicator({
 
   if (status === "running") {
     return (
-      <div className="font-mono text-sm py-1 text-amber-500">
+      <p className="font-mono text-sm py-1 text-amber-500">
         [ACCESSING CABAL SUBROUTINE: {displayName}
         <span className="pulse-dots">...</span>]
-      </div>
+      </p>
     );
   }
 
   return (
-    <div className="font-mono text-sm py-1 text-amber-600">
+    <p className="font-mono text-sm py-1 text-amber-600">
       [SUBROUTINE COMPLETE: {displayName}]
       {message && <span className="text-amber-700 ml-2">- {message}</span>}
-    </div>
+    </p>
   );
 }
