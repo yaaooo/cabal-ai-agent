@@ -82,6 +82,65 @@ cabal-ai-agent/
 
 ## Development Patterns
 
+### State Management (Frontend)
+
+**Prefer Normalization for Collections**  
+When dealing with arrays of objects in React state, avoid repeatedly traversing all items. Instead, use a normalized structure:
+
+```typescript
+// ❌ Avoid: Array traversal for every lookup/update
+const [messages, setMessages] = useState<Message[]>([]);
+updateMessage(id) => prev.map(msg => msg.id === id ? {...msg, ...updates} : msg)
+
+// ✅ Prefer: Normalized with direct access
+const [messageIds, setMessageIds] = useState<string[]>([]);
+const [messageMap, setMessageMap] = useState<Record<string, Message>>({});
+updateMessage(id) => messageMap[id]  // Direct access
+
+// Derive array view when needed
+const messages = useMemo(() => messageIds.map(id => messageMap[id]), [messageIds, messageMap]);
+```
+
+**Benefits:**
+- Direct lookups via map instead of array traversal
+- Better performance with large collections
+- Maintains order via ids array
+- External API can still provide array view
+
+**Example:** `useMessagesState` hook uses this pattern for chat messages
+
+**Avoid Stale Closures in useCallback**  
+When writing event handlers in custom hooks, always use functional state updates to avoid stale closures:
+
+```typescript
+// ❌ AVOID: Reading state from closure (stale on fast events)
+const handler = useCallback((id, data) => {
+  const existing = stateMap[id];  // Closure - stale on fast calls!
+  if (existing) {
+    setStateMap({ ...stateMap, [id]: { ...existing, ...data } });
+  }
+}, [stateMap]);  // Recreates on every state change
+
+// ✅ PREFER: Reading from current state inside setter
+const handler = useCallback((id, data) => {
+  setStateMap(prev => {
+    const existing = prev[id];  // Always current state!
+    if (existing) {
+      return { ...prev, [id]: { ...existing, ...data } };
+    }
+    return { ...prev, [id]: data };
+  });
+}, []);  // Stable - no dependencies needed
+```
+
+**Why:**
+- Fast sequential events can execute callbacks with stale state from previous renders
+- `prev` parameter in setState always has current state
+- Empty dependency array = stable callback = better performance
+- ESLint's `exhaustive-deps` catches missing deps but NOT this pattern
+
+**Rule of Thumb:** If your callback updates state based on that same state's value, use functional updates.
+
 ### Manual Steps Required
 1. **OpenSearch Index Creation**: Cannot be automated in CDK without custom resources
    ```json
@@ -173,6 +232,38 @@ AWS_REGION=us-east-1
 | Bedrock | Claude Haiku, moderate usage | ~$5-10 |
 | Secrets Manager | 1 secret | ~$0.40 |
 | **Total** | | **~$35-40/month** |
+
+## Bugs Fixed (Session Log)
+
+### 1. Nested State Setters in useMessagesState
+**Issue**: Called `setMessageIds` from inside `setMessageMap`'s update function  
+**Impact**: Caused duplicate messages in React StrictMode (development)  
+**Fix**: Check message existence outside setter, call both setters independently  
+**Root Cause**: Violates React's rules - don't call setState from within another setState
+
+### 2. MSW Tool Call ID Mismatch
+**Issue**: Used `Date.now()` twice for tool_call_start and tool_call_complete events  
+**Impact**: Different IDs generated, tool status updates didn't work  
+**Fix**: Save ID in variable, reuse for both events  
+**Root Cause**: Timing difference between calls creates different timestamps
+
+### 3. Discriminated Union Runtime Guards
+**Issue**: Used runtime checks for `isStreaming` boolean property  
+**Impact**: No compile-time type safety, unnecessary runtime overhead  
+**Fix**: Split into `StreamingCabalMessage` and `StandardCabalMessage` with literal types  
+**Root Cause**: Didn't leverage TypeScript's discriminated union pattern
+
+### 4. Array Traversal for Lookups
+**Issue**: Used array with `.map()` and `.find()` for every message operation  
+**Impact**: Performance degraded with message count  
+**Fix**: Normalized state with ids array + message map for direct access  
+**Root Cause**: Didn't follow normalization pattern for collections in state
+
+### 5. Stale Closure in addOrExtendStreamingMessage
+**Issue**: Read `messageMap[id]` from closure with `messageMap` in dependencies  
+**Impact**: Fast sequential events used stale state, creating 20+ duplicate messages  
+**Fix**: Read from `prev` parameter inside setState, remove dependencies  
+**Root Cause**: Closure captures old state snapshot; fast events execute with stale callbacks
 
 ## Known Limitations & Workarounds
 

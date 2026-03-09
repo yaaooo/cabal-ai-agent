@@ -188,6 +188,23 @@
 - S3: <$0.50/month (minimal storage)
 - **Total**: ~$32/month (within budget)
 
+### Phase 5: Backend Schema Alignment (Future - Post-MVP)
+**Status**: Backlog - Frontend currently using mock data
+
+**Problem**: Backend SSE format doesn't match frontend expectations
+- Backend uses simple `event: message/tool/done` with string data
+- Frontend expects structured JSON with `type`, `messageId`, `toolCallId`, etc.
+
+**Required Changes to cabal.py**:
+- [ ] Add message ID generation and tracking
+- [ ] Send `content_delta` events with messageId + delta fields
+- [ ] Implement tool_call_start/complete lifecycle with toolCallId
+- [ ] Extract and send source metadata in message_complete events
+- [ ] Update format_sse() to accept structured dict instead of plain string
+
+**Impact**: Currently frontend works with MSW mocks; won't connect to real backend until this is done
+**Priority**: Medium (can develop frontend in parallel)
+
 ## Next Session Priorities
 
 1. **Fix Tailwind**: Resolve text styling issue in montauk-ui
